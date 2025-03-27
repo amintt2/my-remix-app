@@ -72,6 +72,16 @@ app/
 │   ├── _main.popular.tsx      # Popular games category page
 │   ├── _main.new.tsx          # New games category page
 │   ├── _main.action.tsx       # Action games category page
+│   ├── _main.adventure.tsx    # Adventure games category page
+│   ├── _main.puzzle.tsx       # Puzzle games category page
+│   ├── _main.sports.tsx       # Sports games category page
+│   ├── _main.shooting.tsx     # Shooting games category page
+│   ├── _main.racing.tsx       # Racing games category page
+│   ├── _main.strategy.tsx     # Strategy games category page
+│   ├── _main.simulation.tsx   # Simulation games category page
+│   ├── _main.clicker.tsx      # Clicker games category page
+│   ├── _main.io.tsx           # IO games category page
+│   ├── _main.trending.tsx     # Trending games sorted by play count
 │   ├── _main.games.$gameId.tsx # Game detail page with game embedding
 │   └── _main.search.tsx       # Search results page
 ├── entry.client.tsx           # Client entry point
@@ -99,21 +109,32 @@ app/
 - ✅ **_main.popular.tsx** - Popular games category page
 - ✅ **_main.new.tsx** - New games category page
 - ✅ **_main.action.tsx** - Action games category page
+- ✅ **_main.adventure.tsx** - Adventure games category page
+- ✅ **_main.puzzle.tsx** - Puzzle games category page
+- ✅ **_main.sports.tsx** - Sports games category page
+- ✅ **_main.shooting.tsx** - Shooting games category page
+- ✅ **_main.racing.tsx** - Racing games category page
+- ✅ **_main.strategy.tsx** - Strategy games category page
+- ✅ **_main.simulation.tsx** - Simulation games category page
+- ✅ **_main.clicker.tsx** - Clicker games category page
+- ✅ **_main.io.tsx** - IO games category page
+- ✅ **_main.trending.tsx** - Trending games page sorted by play count
 - ✅ **_main.games.$gameId.tsx** - Game detail page with game embedding
 - ✅ **_main.search.tsx** - Search results page
 
 ## 🏗️ Phase 1: Remaining Implementation Tasks
 
 ### 1.1 Missing Category Routes (All Priority HIGH)
-- [ ] **_main.adventure.tsx** - Adventure games category
-- [ ] **_main.puzzle.tsx** - Puzzle games category
-- [ ] **_main.sports.tsx** - Sports games category
-- [ ] **_main.shooting.tsx** - Shooting games category
-- [ ] **_main.racing.tsx** - Racing games category
-- [ ] **_main.strategy.tsx** - Strategy games category
-- [ ] **_main.simulation.tsx** - Simulation games category
-- [ ] **_main.clicker.tsx** - Clicker games category
-- [ ] **_main.io.tsx** - .io games category
+- [x] **_main.adventure.tsx** - Adventure games category
+- [x] **_main.puzzle.tsx** - Puzzle games category
+- [x] **_main.sports.tsx** - Sports games category
+- [x] **_main.shooting.tsx** - Shooting games category
+- [x] **_main.racing.tsx** - Racing games category
+- [x] **_main.strategy.tsx** - Strategy games category
+- [x] **_main.simulation.tsx** - Simulation games category
+- [x] **_main.clicker.tsx** - Clicker games category
+- [x] **_main.io.tsx** - .io games category
+- [x] **_main.trending.tsx** - Trending games by play count
 
 ### 1.2 Search Functionality Enhancements (Priority MEDIUM)
 - [ ] **_main.search.suggestions.tsx** - Search suggestions API endpoint
@@ -138,11 +159,13 @@ app/
 
 ## 📝 Quick-Start Implementation Path for Remaining Tasks
 
-1. Create remaining category routes using the established pattern (one per day)
-2. Enhance search functionality with suggestions
-3. Connect Header search input to search results page
-4. Implement profile pages for displaying favorites and history
-5. If time permits, tackle authentication system and analytics
+1. ~~Create remaining category routes using the established pattern (one per day)~~
+2. ~~Add trending games section sorted by play count~~
+3. ~~Add popular and trending sections to the main page~~
+4. Enhance search functionality with suggestions
+5. Connect Header search input to search results page
+6. Implement profile pages for displaying favorites and history
+7. If time permits, tackle authentication system and analytics
 
 ## 🧰 Implementation Notes
 
@@ -154,12 +177,38 @@ app/
 - ✅ Implemented search results page with keyword matching
 - ✅ Added new games category with special labeling
 - ✅ Established a reusable pattern for category routes 
+- ✅ Completed all category routes following the established pattern
+  - Each category route follows the same structure with unique styling
+  - Category-specific icons and color schemes for visual distinction
+  - All routes leverage the game service for category-based filtering
+  - Consistent favorite/unfavorite functionality throughout all categories
+  - Responsive grid layout with appropriate breakpoints for all screen sizes
+- ✅ Expanded game data with 15 additional games
+  - Added multiple games for each category to ensure rich content
+  - Ensured overlap between categories for cross-category discovery
+  - Included new and popular flags for special highlighting
+  - Created detailed descriptions and appropriate metadata for each game
+  - Assigned unique colors to each game card for visual distinction
+- ✅ Added trending games feature
+  - Implemented a dedicated trending route showing most-played games
+  - Enhanced gameService with a getTrendingGames method
+  - Created a specialized UI with play count badges
+  - Used Intl.NumberFormat for localized number formatting
+  - Added explanatory header for improved user experience
+- ✅ Enhanced main page with popular and trending sections
+  - Added side-by-side popular and trending games widgets
+  - Created compact list view for better information density
+  - Displayed game ratings for popular games
+  - Highlighted play counts for trending games
+  - Implemented "View more" links to dedicated category pages
 
 ### Next Focus Areas
-1. Complete the remaining category routes following the established pattern
-2. Add search suggestions to enhance the search experience
-3. Connect the header search input to the search functionality
-4. Implement user profile pages for favorites and history
+1. ~~Complete the remaining category routes following the established pattern~~
+2. ~~Add trending games feature with play count sorting and specialized UI~~
+3. ~~Enhance main page with popular and trending sections~~
+4. Add search suggestions to enhance the search experience
+5. Connect the header search input to the search functionality
+6. Implement user profile pages for favorites and history
 
 ## 🤝 Contributing
 

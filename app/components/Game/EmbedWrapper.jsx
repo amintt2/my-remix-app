@@ -5,8 +5,8 @@ export default function EmbedWrapper({ game }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const iframeRef = useRef(null);
   
-  // Mock embed URL - in a real implementation, you would get this from your game data
-  const embedUrl = `/embed/${game.id}`;
+  // Use the actual embed URL from game data if available, otherwise fallback to mock URL
+  const embedUrl = game.embed || `/embed/${game.id}`;
   
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -84,5 +84,6 @@ EmbedWrapper.propTypes = {
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     title: PropTypes.string.isRequired,
     color: PropTypes.string.isRequired,
+    embed: PropTypes.string,
   }).isRequired,
 }; 

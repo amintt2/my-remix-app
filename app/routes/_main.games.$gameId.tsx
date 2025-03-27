@@ -1,9 +1,9 @@
-import { useLoaderData, useNavigate } from "@remix-run/react";
+import { useLoaderData, useNavigate, useSearchParams } from "@remix-run/react";
 import { json, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { useGameContext } from "~/contexts/GameContext";
 import { gameService } from "~/services/gameService";
 import EmbedWrapper from "~/components/Game/EmbedWrapper";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   if (!data?.game) {
@@ -45,11 +45,26 @@ export default function GameDetail() {
   const { game, relatedGames } = useLoaderData<typeof loader>();
   const { addToPlayHistory, isGameFavorite, addToFavorites, removeFromFavorites } = useGameContext();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromPlayPage = searchParams.get('from') === 'play';
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     // Add the game to play history when the component mounts
     addToPlayHistory(game);
-  }, [game, addToPlayHistory]);
+    
+    // Redirect to play page if not coming from there
+    if (!fromPlayPage) {
+      navigate(`/play/${game.id}`, { replace: true });
+    } else {
+      // If coming from play page, show loading indicator briefly
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [game, addToPlayHistory, fromPlayPage, navigate]);
   
   const handleFavoriteToggle = () => {
     if (isGameFavorite(game.id)) {
@@ -58,6 +73,14 @@ export default function GameDetail() {
       addToFavorites(game);
     }
   };
+  
+  if (!fromPlayPage) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
   
   return (
     <div className="container mx-auto px-4 py-6">
@@ -83,8 +106,16 @@ export default function GameDetail() {
         </button>
       </div>
       
-      {/* Game embed container */}
-      <div className="aspect-video mb-8 rounded-lg overflow-hidden border border-gray-700 shadow-lg">
+      {/* Game embed container with loading state */}
+      <div className="aspect-video mb-8 rounded-lg overflow-hidden border border-gray-700 shadow-lg relative">
+        {isLoading ? (
+          <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
+            <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
+              <p className="text-white">Chargement du jeu...</p>
+            </div>
+          </div>
+        ) : null}
         <EmbedWrapper game={game} />
       </div>
       
@@ -92,7 +123,7 @@ export default function GameDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
         <div className="lg:col-span-2">
           <h2 className="text-xl font-bold text-white mb-3">À propos du jeu</h2>
-          <p className="text-gray-300 mb-6">{game.description}</p>
+          <p className="text-gray-300 mb-6 whitespace-pre-line">{game.description}</p>
           
           {/* Game stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
@@ -121,6 +152,23 @@ export default function GameDetail() {
             </div>
           </div>
           
+          {/* Game tags if available */}
+          {game.tags && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-white mb-2">Tags</h3>
+              <div className="flex flex-wrap gap-2">
+                {game.tags.split(',').map(tag => (
+                  <span 
+                    key={tag.trim()} 
+                    className="bg-gray-800 text-gray-300 text-xs px-2 py-1 rounded"
+                  >
+                    {tag.trim()}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          
           {/* Controls - placeholder, would show actual controls in a real implementation */}
           <h3 className="text-lg font-semibold text-white mb-2">Controls</h3>
           <div className="bg-gray-800 p-4 rounded-lg mb-6">
@@ -142,7 +190,23 @@ export default function GameDetail() {
             {relatedGames.map(relatedGame => (
               <div key={relatedGame.id} className="bg-gray-800 rounded-lg overflow-hidden flex items-center">
                 <div className={`w-16 h-16 ${relatedGame.color} flex-shrink-0 flex items-center justify-center`}>
-                  <span className="text-white font-bold text-xl">{relatedGame.title.substring(0, 1)}</span>
+                  {relatedGame.image ? (
+                    <img 
+                      src={relatedGame.image} 
+                      alt={relatedGame.title} 
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `<span class="text-white font-bold text-xl">${relatedGame.title.substring(0, 1)}</span>`;
+                        }
+                      }}
+                    />
+                  ) : (
+                    <span className="text-white font-bold text-xl">{relatedGame.title.substring(0, 1)}</span>
+                  )}
                 </div>
                 <div className="p-3">
                   <div className="text-white font-semibold">{relatedGame.title}</div>
@@ -154,7 +218,7 @@ export default function GameDetail() {
                   </div>
                 </div>
                 <a 
-                  href={`/games/${relatedGame.id}`}
+                  href={`/play/${relatedGame.id}`}
                   className="ml-auto bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-3 py-2 h-full flex items-center"
                 >
                   Play

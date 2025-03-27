@@ -1,0 +1,1 @@
+Restart Remix server to update routes 
