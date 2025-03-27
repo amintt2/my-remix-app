@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="150px" viewBox="0 0 200 150" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <title>Controller</title>
+    <g fill="#FFFFFF" stroke="none">
+        <path d="M60,30 C40,30 20,45 20,75 C20,105 40,120 60,120 L140,120 C160,120 180,105 180,75 C180,45 160,30 140,30 L60,30 Z M60,45 L140,45 C155,45 165,55 165,75 C165,95 155,105 140,105 L60,105 C45,105 35,95 35,75 C35,55 45,45 60,45 Z" />
+        <circle cx="130" cy="65" r="10" />
+        <circle cx="150" cy="85" r="10" />
+        <circle cx="110" cy="85" r="10" />
+        <circle cx="130" cy="105" r="10" />
+        <rect x="40" y="65" width="40" height="10" rx="5" />
+        <rect x="55" y="50" width="10" height="40" rx="5" />
+    </g>
+</svg> 
