@@ -64,7 +64,7 @@ export default function GameDetail() {
       
       return () => clearTimeout(timer);
     }
-  }, [game, addToPlayHistory, fromPlayPage, navigate]);
+  }, [game.id, fromPlayPage, navigate]);
   
   const handleFavoriteToggle = () => {
     if (isGameFavorite(game.id)) {

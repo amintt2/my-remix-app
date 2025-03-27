@@ -4,16 +4,19 @@ import PropTypes from 'prop-types';
 export default function EmbedWrapper({ game }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const iframeRef = useRef(null);
+  const embedContainerRef = useRef(null);
   
-  // Use the actual embed URL from game data if available, otherwise fallback to mock URL
-  const embedUrl = game.embed || `/embed/${game.id}`;
+  // Check if we have HTML embed code or a direct URL
+  const isHtmlEmbed = game.embed && (game.embed.includes('<div>') || game.embed.includes('<script'));
   
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      iframeRef.current.requestFullscreen().catch(err => {
+    const element = isHtmlEmbed ? embedContainerRef.current : iframeRef.current;
+    
+    if (!document.fullscreenElement && element) {
+      element.requestFullscreen().catch(err => {
         console.error(`Error attempting to enable fullscreen: ${err.message}`);
       });
-    } else {
+    } else if (document.fullscreenElement) {
       document.exitFullscreen();
     }
   };
@@ -29,6 +32,13 @@ export default function EmbedWrapper({ game }) {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
+  
+  // Set HTML embed content
+  useEffect(() => {
+    if (isHtmlEmbed && embedContainerRef.current) {
+      embedContainerRef.current.innerHTML = game.embed;
+    }
+  }, [game.embed, isHtmlEmbed]);
   
   return (
     <div className="relative bg-black w-full h-full flex flex-col">
@@ -59,21 +69,23 @@ export default function EmbedWrapper({ game }) {
         </div>
       </div>
       
-      {/* Game embed iframe */}
+      {/* Game embed content */}
       <div className="flex-grow relative">
-        <iframe
-          ref={iframeRef}
-          src={embedUrl}
-          title={`Play ${game.title}`}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          className="w-full h-full border-0"
-        />
-        
-        {/* Loading overlay - could be shown until iframe is loaded */}
-        {/* <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-        </div> */}
+        {isHtmlEmbed ? (
+          <div 
+            ref={embedContainerRef}
+            className="w-full h-full bg-white"
+          ></div>
+        ) : (
+          <iframe
+            ref={iframeRef}
+            src={game.embed || `/embed/${game.id}`}
+            title={`Play ${game.title}`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="w-full h-full border-0"
+          />
+        )}
       </div>
     </div>
   );

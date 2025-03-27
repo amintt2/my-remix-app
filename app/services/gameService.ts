@@ -1,3 +1,5 @@
+import sourceGamesData from '../../sourcegame2.json';
+
 export interface Game {
   id: number | string;
   title: string;
@@ -20,6 +22,27 @@ interface SourceGame {
   image: string;
   tags: string;
   description: string;
+}
+
+// Define the type for the sourcegame2 object
+interface SourceGame2 {
+  name: string;
+  category: string;
+  description: string;
+  embed: string;
+  thumb1?: string;
+  thumb2?: string;
+  thumb3?: string;
+  thumb4?: string;
+  thumb5?: string;
+  thumb6?: string;
+  thumb7?: string;
+  thumb8?: string;
+  url?: string;
+  youtube?: string | null;
+  width?: number;
+  height?: number;
+  create_date?: string;
 }
 
 // Function to generate a random number of plays between min and max
@@ -65,19 +88,27 @@ const tagsToCategories = (tags: string) => {
     'action': 'action',
     'adventure': 'adventure',
     'puzzle': 'puzzle',
+    'puzzles': 'puzzle',
+    'mahjong': 'puzzle',
     'sport': 'sports',
     'sports': 'sports',
     'strategy': 'strategy',
     'simulation': 'simulation',
     'simulator': 'simulation',
     'clicker': 'clicker',
-    'io': 'io'
+    'io': 'io',
+    'hidden': 'puzzle',
+    'hidden objects': 'puzzle',
+    'connect': 'puzzle',
+    'classic': 'casual',
+    'html5': 'html5',
+    'free': 'free'
   };
   
   const categories = new Set<string>();
   
   // Check if game is popular or new (random assignment for demo)
-  if (Math.random() > 0.8) {
+  if (tags.includes('popular')) {
     categories.add('popular');
   }
   
@@ -108,14 +139,41 @@ const getProxiedImageUrl = (url: string) => {
   return `https://images.weserv.nl/?url=${encodeURIComponent(url)}&default=placeholder`;
 };
 
+// Convert game data from sourcegame2.json format to our SourceGame format
+const convertSourceGame2Format = (game: SourceGame2): SourceGame => {
+  // Set tags with proper categories
+  let categoryTags = game.category + (game.category.includes(',') ? '' : ',') + 'html5,free';
+  
+  // For demo purposes, mark some games as popular/featured based on category
+  const isPopular = game.category.toLowerCase().includes('mahjong') || 
+                   game.category.toLowerCase().includes('hidden') ||
+                   Math.random() > 0.7; // Random chance to be popular
+  
+  if (isPopular) {
+    categoryTags += ',popular';
+  }
+  
+  return {
+    title: game.name,
+    embed: game.embed,
+    // Use the highest quality thumbnail available
+    image: game.thumb8 || game.thumb7 || game.thumb6 || game.thumb5 || game.thumb4 || game.thumb3 || game.thumb2 || game.thumb1 || '',
+    tags: categoryTags,
+    description: game.description
+  };
+};
+
 // Convert source games from JSON to our format
 const convertSourceGames = (games: SourceGame[]) => {
   return games.map((game, index) => {
     const categories = tagsToCategories(game.tags);
     const isNew = Math.random() > 0.7; // Random assignment for demonstration
     
+    // Extract just the game name from the embed for use in routing
+    const gameId = 100 + index; // Default ID if we can't extract a better one
+    
     return {
-      id: 100 + index, // Start IDs from 100 to avoid conflicts
+      id: gameId, // Start IDs from 100 to avoid conflicts
       title: game.title,
       image: getProxiedImageUrl(game.image),
       embed: game.embed,
@@ -132,68 +190,19 @@ const convertSourceGames = (games: SourceGame[]) => {
 };
 
 // Source games from external JSON
-const sourceGames: SourceGame[] = [
-  {
-    "title": "Mr Space Bullet",
-    "embed": "https://www.onlinegames.io/games/2021/4/mr-space-bullet/index.html",
-    "image": "https://www.onlinegames.io/media/posts/707/responsive/Mr-Space-Bullet-xs.jpg",
-    "tags": "1-player,2d,arcade,free,gun,mobile,mouse,shooting,space,weapon",
-    "description": "Mr Space Bullet is a 2D shooting game where you will be on a staircase in outer space. While trying to climb up, you will come across many aliens on your way. Your job is to aim at your enemies precisely at their heads. \nShoot the alien you encounter on every stair without blinking an eye."
-  },
-  {
-    "title": "Truck Racing",
-    "embed": "https://www.onlinegames.io/games/2022/construct/144/truck-racing/index.html",
-    "image": "https://www.onlinegames.io/media/posts/712/responsive/Truck-Racing-xs.jpg",
-    "tags": "1-player,2d,car,crazy,free,html5,mobile,racing,truck",
-    "description": "Roads are tough, and slopes are steep. Dropping the cargo box is bleep. \nFrom doorstep to destination, your job here is to be a trusty delivery truck driver. Truck Racing is an online driving game where you transport and deliver boxes without damaging them."
-  },
-  {
-    "title": "Jackpot Casino",
-    "embed": "https://www.onlinegames.io/games/2021/4/jackpot-casino/index.html",
-    "image": "https://www.onlinegames.io/media/posts/635/responsive/Jackpot-Casino-xs.jpg",
-    "tags": "1-player,2d,crazy,free,fun,html5,mobile,mouse,simulator",
-    "description": "Jackpot Casino is a free slot game where your main aim is to line up the same symbols on the slot machine side by side to claim your prize. You will see that the machine is adorned with many symbols. Spin the reels and try to get at least three identical tokens shoulder-to-shoulder. Hit the jackpot in this exciting kids game!"
-  }
-];
+const sourceGames2 = sourceGamesData.slice(0, 100);
+
+// Convert the sourcegame2 format to our SourceGame format
+const convertedSourceGames2 = sourceGames2.map(convertSourceGame2Format);
+
+// Source games from external JSON - OLD EXAMPLE SOURCE GAMES (REPLACED)
+const sourceGames: SourceGame[] = convertedSourceGames2;
 
 // Convert source games
 const convertedSourceGames = convertSourceGames(sourceGames);
 
 // Main game data collection
 const gamesData: Game[] = [
-  { id: 1, title: 'WorldGuessr', image: '/images/worldguessr.jpg', featured: true, color: 'bg-blue-600', category: ['popular', 'puzzle', 'adventure'], rating: 4.8, plays: 125000, description: 'Test your geography knowledge by guessing locations around the world.' },
-  { id: 2, title: 'PolyTrack', image: '/images/polytrack.jpg', featured: true, color: 'bg-green-600', category: ['popular', 'racing', 'action'], rating: 4.6, plays: 98000, description: 'Race through dynamic polygonal tracks in this fast-paced racing game.' },
-  { id: 3, title: 'BlueRun', image: '/images/bluerun.jpg', featured: true, color: 'bg-purple-600', category: ['popular', 'adventure', 'action'], rating: 4.7, plays: 110000, description: 'Navigate through challenging obstacles in this endless runner.' },
-  { id: 4, title: 'Bloxd.io', image: '/images/bloxdio.jpg', featured: true, color: 'bg-red-600', category: ['popular', 'io', 'strategy'], rating: 4.9, plays: 150000, description: 'Build, compete, and survive in this multiplayer block-building game.' },
-  { id: 5, title: 'RPG Rush', image: '/images/rpgrush.jpg', color: 'bg-yellow-600', category: ['popular', 'adventure', 'action'], rating: 4.5, plays: 85000, description: 'Quick RPG adventures with fast-paced combat and progression.' },
-  { id: 6, title: 'DragonFlight', image: '/images/dragonflight.jpg', color: 'bg-indigo-600', category: ['action', 'adventure', 'shooting'], rating: 4.3, plays: 75000, description: 'Soar through the skies on a dragon and battle enemies.' },
-  { id: 7, title: 'BubbleRoll', image: '/images/bubbleroll.jpg', color: 'bg-pink-600', category: ['puzzle', 'casual'], rating: 4.2, plays: 65000, description: 'Match and pop bubbles in this addictive puzzle game.' },
-  { id: 8, title: 'Empire Clash', image: '/images/empireclash.jpg', color: 'bg-teal-600', category: ['strategy', 'simulation'], rating: 4.4, plays: 80000, description: 'Build your empire and clash with rivals in this strategy game.' },
-  { id: 9, title: 'OceanDive', image: '/images/oceandive.jpg', color: 'bg-cyan-600', category: ['adventure', 'simulation'], rating: 4.1, plays: 60000, description: 'Explore the depths of the ocean in this immersive diving simulator.' },
-  { id: 10, title: 'SpeedClick', image: '/images/speedclick.jpg', color: 'bg-orange-600', category: ['clicker', 'casual'], new: true, rating: 4.0, plays: 50000, description: 'Test your clicking speed and reflexes.' },
-  { id: 11, title: 'TowerDefense', image: '/images/towerdefense.jpg', color: 'bg-lime-600', category: ['strategy', 'action'], new: true, rating: 4.7, plays: 90000, description: 'Defend your territory by strategically placing towers.' },
-  { id: 12, title: 'ZombieCrush', image: '/images/zombiecrush.jpg', color: 'bg-amber-600', category: ['action', 'shooting'], new: true, rating: 4.6, plays: 85000, description: 'Survive the zombie apocalypse in this action-packed shooter.' },
-  { id: 13, title: 'PuzzleMaster', image: '/images/puzzlemaster.jpg', color: 'bg-emerald-600', category: ['puzzle'], new: true, rating: 4.5, plays: 70000, description: 'Challenge your mind with intricate puzzles.' },
-  { id: 14, title: 'SpaceShooter', image: '/images/spaceshooter.jpg', color: 'bg-violet-600', category: ['shooting', 'action'], new: true, rating: 4.3, plays: 65000, description: 'Defend the galaxy in this classic space shooter.' },
-  { id: 15, title: 'RacingStars', image: '/images/racingstars.jpg', color: 'bg-rose-600', category: ['racing', 'sports'], rating: 4.4, plays: 75000, description: 'Compete in high-speed races against other players.' },
-  
-  // New games for additional categories
-  { id: 16, title: 'SportsMania', image: '/images/sportsmania.jpg', color: 'bg-blue-500', category: ['sports', 'simulation'], new: true, rating: 4.5, plays: 72000, description: 'Multi-sport simulation with realistic physics and controls.' },
-  { id: 17, title: 'Basketball Pro', image: '/images/basketballpro.jpg', color: 'bg-orange-500', category: ['sports', 'action'], rating: 4.3, plays: 68000, description: 'Play as your favorite basketball stars in this slam dunk simulator.' },
-  { id: 18, title: 'Soccer Champions', image: '/images/soccerchampions.jpg', color: 'bg-green-500', category: ['sports', 'popular'], rating: 4.7, plays: 95000, description: 'Lead your team to victory in this strategic soccer management game.' },
-  { id: 19, title: 'Sniper Elite', image: '/images/sniperelite.jpg', color: 'bg-gray-700', category: ['shooting', 'action'], rating: 4.6, plays: 88000, description: 'Precision shooting with realistic bullet physics and stealth mechanics.' },
-  { id: 20, title: 'Zombie Apocalypse', image: '/images/zombieapocalypse.jpg', color: 'bg-red-700', category: ['shooting', 'action', 'popular'], rating: 4.5, plays: 92000, description: 'Survive waves of zombies in this intense first-person shooter.' },
-  { id: 21, title: 'Formula Racer', image: '/images/formularacer.jpg', color: 'bg-yellow-500', category: ['racing', 'simulation'], rating: 4.2, plays: 65000, description: 'Experience high-speed Formula racing with realistic car handling.' },
-  { id: 22, title: 'Drift King', image: '/images/driftking.jpg', color: 'bg-purple-500', category: ['racing', 'action'], new: true, rating: 4.4, plays: 70000, description: 'Master the art of drifting in this high-octane racing game.' },
-  { id: 23, title: 'City Builder', image: '/images/citybuilder.jpg', color: 'bg-cyan-500', category: ['simulation', 'strategy'], rating: 4.7, plays: 85000, description: 'Build and manage your own thriving metropolis.' },
-  { id: 24, title: 'Farm Life', image: '/images/farmlife.jpg', color: 'bg-green-600', category: ['simulation', 'casual'], rating: 4.1, plays: 62000, description: 'Experience the joys and challenges of running a virtual farm.' },
-  { id: 25, title: 'War Commander', image: '/images/warcommander.jpg', color: 'bg-red-600', category: ['strategy', 'popular'], rating: 4.8, plays: 105000, description: 'Lead your armies to victory in this epic real-time strategy game.' },
-  { id: 26, title: 'Chess Master', image: '/images/chessmaster.jpg', color: 'bg-amber-700', category: ['strategy', 'puzzle'], rating: 4.5, plays: 75000, description: 'Challenge your mind with classic chess and unique variants.' },
-  { id: 27, title: 'Cookie Clicker Pro', image: '/images/cookieclicker.jpg', color: 'bg-amber-500', category: ['clicker', 'casual', 'popular'], rating: 4.3, plays: 120000, description: 'The ultimate idle clicker game with endless upgrades and achievements.' },
-  { id: 28, title: 'Tycoon Tapper', image: '/images/tycoontapper.jpg', color: 'bg-green-500', category: ['clicker', 'simulation'], new: true, rating: 4.2, plays: 55000, description: 'Build your business empire with simple but addictive tapping mechanics.' },
-  { id: 29, title: 'Battle.io', image: '/images/battleio.jpg', color: 'bg-blue-600', category: ['io', 'action', 'popular'], rating: 4.6, plays: 130000, description: 'Compete against players worldwide in this fast-paced battle arena.' },
-  { id: 30, title: 'Snake.io', image: '/images/snakeio.jpg', color: 'bg-green-400', category: ['io', 'casual'], rating: 4.4, plays: 110000, description: 'Grow your snake by consuming power-ups and outmaneuvering opponents.' },
-  
   // Add the converted source games
   ...convertedSourceGames
 ];

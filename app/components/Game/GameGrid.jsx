@@ -11,15 +11,15 @@ export default function GameGrid() {
 
   useEffect(() => {
     // Load game data from the service
-    setFeaturedGames(gameService.getFeaturedGames());
+    setFeaturedGames(gameService.getFeaturedGames().slice(0, 8));
     
     // Create categories with games from the service
     setCategories([
-      { id: 'action', title: 'Jeux d\'action', games: gameService.getGamesByCategory('action').slice(0, 5) },
-      { id: 'puzzle', title: 'Jeux de Puzzle', games: gameService.getGamesByCategory('puzzle').slice(0, 5) },
-      { id: 'racing', title: 'Jeux de Course', games: gameService.getGamesByCategory('racing').slice(0, 5) },
-      { id: 'adventure', title: 'Jeux d\'Aventure', games: gameService.getGamesByCategory('adventure').slice(0, 5) },
-      { id: 'sports', title: 'Jeux Sports', games: gameService.getGamesByCategory('sports').slice(0, 5) }
+      { id: 'action', title: 'Jeux d\'action', games: gameService.getGamesByCategory('action').slice(0, 8) },
+      { id: 'puzzle', title: 'Jeux de Puzzle', games: gameService.getGamesByCategory('puzzle').slice(0, 8) },
+      { id: 'racing', title: 'Jeux de Course', games: gameService.getGamesByCategory('racing').slice(0, 8) },
+      { id: 'adventure', title: 'Jeux d\'Aventure', games: gameService.getGamesByCategory('adventure').slice(0, 8) },
+      { id: 'sports', title: 'Jeux Sports', games: gameService.getGamesByCategory('sports').slice(0, 8) }
     ]);
   }, []);
 

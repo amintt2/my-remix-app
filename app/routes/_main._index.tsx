@@ -14,8 +14,8 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader() {
-  const popularGames = gameService.getPopularGames().slice(0, 5);
-  const trendingGames = gameService.getTrendingGames().slice(0, 5);
+  const popularGames = gameService.getPopularGames().slice(0, 10);
+  const trendingGames = gameService.getTrendingGames().slice(0, 10);
   
   return json({
     popularGames,
