@@ -1,30 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import { Game } from '~/services/gameService';
 
-export default function EmbedWrapper({ game }) {
+interface EmbedWrapperProps {
+  game?: Partial<Game>;
+}
+
+export default function EmbedWrapper({ game }: EmbedWrapperProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const iframeRef = useRef(null);
-  const embedContainerRef = useRef(null);
-  
-  // Check if we have HTML embed code or a direct URL
-  const isHtmlEmbed = game.embed && (game.embed.includes('<div>') || game.embed.includes('<script'));
-  
-  const toggleFullscreen = () => {
-    const element = isHtmlEmbed ? embedContainerRef.current : iframeRef.current;
-    
-    if (!document.fullscreenElement && element) {
-      element.requestFullscreen().catch(err => {
-        console.error(`Error attempting to enable fullscreen: ${err.message}`);
-      });
-    } else if (document.fullscreenElement) {
-      document.exitFullscreen();
-    }
-  };
-  
-  const handleGoBack = () => {
-    // Use browser history back to exit game view
-    window.history.back();
-  };
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const embedContainerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -32,37 +16,63 @@ export default function EmbedWrapper({ game }) {
     };
     
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
   
-  // Set HTML embed content
   useEffect(() => {
-    if (isHtmlEmbed && embedContainerRef.current) {
+    if (!game?.embed || !embedContainerRef.current) return;
+
+    const isHtmlEmbed = game.embed.includes('<div>') || game.embed.includes('<script');
+    if (!isHtmlEmbed) return;
+    
+    try {
       embedContainerRef.current.innerHTML = game.embed;
+      
+      const scripts = embedContainerRef.current.querySelectorAll('script');
+      scripts.forEach(oldScript => {
+        const newScript = document.createElement('script');
+        Array.from(oldScript.attributes).forEach(attr => {
+          newScript.setAttribute(attr.name, attr.value);
+        });
+        newScript.innerHTML = oldScript.innerHTML;
+        oldScript.parentNode?.replaceChild(newScript, oldScript);
+      });
+    } catch (error) {
+      // Silent error handling
     }
-  }, [game.embed, isHtmlEmbed]);
+  }, [game?.embed]);
+  
+  // If no game provided, silently return empty div
+  if (!game?.id || !game?.embed) {
+    return <div className="hidden"></div>;
+  }
+
+  const isHtmlEmbed = game.embed.includes('<div>') || game.embed.includes('<script');
+
+  const toggleFullscreen = () => {
+    const element = isHtmlEmbed ? embedContainerRef.current : iframeRef.current;
+    if (!document.fullscreenElement && element) {
+      element.requestFullscreen().catch(() => {});
+    } else if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+  };
   
   return (
     <div className="relative bg-black w-full h-full flex flex-col">
       {/* Game header */}
       <div className="bg-gray-900 p-3 flex items-center justify-between">
         <div className="flex items-center">
-          <button 
-            onClick={handleGoBack}
-            className="text-gray-300 hover:text-white mr-2 focus:outline-none"
-            aria-label="Go back"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-          </button>
-          <div className={`w-8 h-8 rounded-md flex items-center justify-center ${game.color}`}>
-            <span className="text-white font-bold">{game.title.substring(0, 1)}</span>
+          <div className={`w-8 h-8 rounded-md flex items-center justify-center ${game.color || 'bg-blue-600'}`}>
+            <span className="text-white font-bold">
+              {game.title?.substring(0, 1) || '?'}
+            </span>
           </div>
-          <h2 className="text-white font-bold ml-2">{game.title}</h2>
+          <h2 className="text-white font-bold ml-2">
+            {game.title || 'Unknown Game'}
+          </h2>
         </div>
         <div className="flex items-center space-x-3">
           <button 
@@ -88,13 +98,13 @@ export default function EmbedWrapper({ game }) {
         {isHtmlEmbed ? (
           <div 
             ref={embedContainerRef}
-            className="w-full h-full bg-white"
+            className="w-full h-full bg-white overflow-hidden"
           ></div>
         ) : (
           <iframe
             ref={iframeRef}
-            src={game.embed || `/embed/${game.id}`}
-            title={`Play ${game.title}`}
+            src={game.embed}
+            title={`Play ${game.title || 'Game'}`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             className="w-full h-full border-0"
@@ -103,13 +113,4 @@ export default function EmbedWrapper({ game }) {
       </div>
     </div>
   );
-}
-
-EmbedWrapper.propTypes = {
-  game: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    title: PropTypes.string.isRequired,
-    color: PropTypes.string.isRequired,
-    embed: PropTypes.string,
-  }).isRequired,
-}; 
+} 

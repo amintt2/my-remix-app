@@ -12,7 +12,7 @@ export default function GameCard({ game, variant = 'standard' }) {
   
   return (
     <Link 
-      to={`/play/${game.id}`}
+      to={`/games/${game.id}`}
       className={`
         relative rounded-lg overflow-hidden ${game.color} 
         ${isLarge ? 'h-40 sm:h-48 md:h-52' : 'h-28 sm:h-32 md:h-36'} 

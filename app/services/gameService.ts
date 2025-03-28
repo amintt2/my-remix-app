@@ -1,4 +1,4 @@
-import sourceGamesData from '../../sourcegame2.json';
+import sourceGamesData from '../../sourcegame.json';
 
 export interface Game {
   id: number | string;
@@ -16,33 +16,12 @@ export interface Game {
 }
 
 // Interface for source game format
-interface SourceGame {
+interface SourceGameFormat {
   title: string;
   embed: string;
   image: string;
   tags: string;
   description: string;
-}
-
-// Define the type for the sourcegame2 object
-interface SourceGame2 {
-  name: string;
-  category: string;
-  description: string;
-  embed: string;
-  thumb1?: string;
-  thumb2?: string;
-  thumb3?: string;
-  thumb4?: string;
-  thumb5?: string;
-  thumb6?: string;
-  thumb7?: string;
-  thumb8?: string;
-  url?: string;
-  youtube?: string | null;
-  width?: number;
-  height?: number;
-  create_date?: string;
 }
 
 // Function to generate a random number of plays between min and max
@@ -139,67 +118,32 @@ const getProxiedImageUrl = (url: string) => {
   return `https://images.weserv.nl/?url=${encodeURIComponent(url)}&default=placeholder`;
 };
 
-// Convert game data from sourcegame2.json format to our SourceGame format
-const convertSourceGame2Format = (game: SourceGame2): SourceGame => {
-  // Set tags with proper categories
-  let categoryTags = game.category + (game.category.includes(',') ? '' : ',') + 'html5,free';
+// Source games from external JSON
+const sourceGamesRaw = sourceGamesData as unknown as SourceGameFormat[];
+
+// Convert the sourcegame format to our Game format
+const convertedSourceGames = sourceGamesRaw.map((game, index) => {
+  const categories = tagsToCategories(game.tags);
+  const isNew = Math.random() > 0.7; // Random assignment for demonstration
   
-  // For demo purposes, mark some games as popular/featured based on category
-  const isPopular = game.category.toLowerCase().includes('mahjong') || 
-                   game.category.toLowerCase().includes('hidden') ||
-                   Math.random() > 0.7; // Random chance to be popular
-  
-  if (isPopular) {
-    categoryTags += ',popular';
-  }
+  // Extract just the game name from the embed for use in routing
+  const gameId = 100 + index; // Default ID if we can't extract a better one
   
   return {
-    title: game.name,
+    id: gameId, // Start IDs from 100 to avoid conflicts
+    title: game.title,
+    image: getProxiedImageUrl(game.image),
     embed: game.embed,
-    // Use the highest quality thumbnail available
-    image: game.thumb8 || game.thumb7 || game.thumb6 || game.thumb5 || game.thumb4 || game.thumb3 || game.thumb2 || game.thumb1 || '',
-    tags: categoryTags,
-    description: game.description
+    color: getColorFromString(game.title),
+    featured: categories.includes('popular'),
+    category: categories,
+    rating: getRandomRating(),
+    plays: getRandomPlays(),
+    new: isNew,
+    description: game.description,
+    tags: game.tags
   };
-};
-
-// Convert source games from JSON to our format
-const convertSourceGames = (games: SourceGame[]) => {
-  return games.map((game, index) => {
-    const categories = tagsToCategories(game.tags);
-    const isNew = Math.random() > 0.7; // Random assignment for demonstration
-    
-    // Extract just the game name from the embed for use in routing
-    const gameId = 100 + index; // Default ID if we can't extract a better one
-    
-    return {
-      id: gameId, // Start IDs from 100 to avoid conflicts
-      title: game.title,
-      image: getProxiedImageUrl(game.image),
-      embed: game.embed,
-      color: getColorFromString(game.title),
-      featured: categories.includes('popular'),
-      category: categories,
-      rating: getRandomRating(),
-      plays: getRandomPlays(),
-      new: isNew,
-      description: game.description,
-      tags: game.tags
-    };
-  });
-};
-
-// Source games from external JSON
-const sourceGames2 = sourceGamesData.slice(0, 100);
-
-// Convert the sourcegame2 format to our SourceGame format
-const convertedSourceGames2 = sourceGames2.map(convertSourceGame2Format);
-
-// Source games from external JSON - OLD EXAMPLE SOURCE GAMES (REPLACED)
-const sourceGames: SourceGame[] = convertedSourceGames2;
-
-// Convert source games
-const convertedSourceGames = convertSourceGames(sourceGames);
+});
 
 // Main game data collection
 const gamesData: Game[] = [
